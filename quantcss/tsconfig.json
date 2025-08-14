@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+     "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  }
+}
