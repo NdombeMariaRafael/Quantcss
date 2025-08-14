@@ -1,8 +1,10 @@
+// src/lexer.ts
 import { Position, Token, TokenType } from "./types";
+import { KNOWN_PROPS } from "./css-props";
 
 const isWhitespace = (ch: string) => /\s/.test(ch);
 const isDigit = (ch: string) => /[0-9]/.test(ch);
-const isIdentStart = (ch: string) => /[A-Za-z_\-]/.test(ch) || ch === "."; // inclui . para potenciais usos futuros
+const isIdentStart = (ch: string) => /[A-Za-z_\-]/.test(ch) || ch === ".";
 const isIdentChar = (ch: string) => /[A-Za-z0-9_\-]/.test(ch);
 const isSelectorSafe = (ch: string) => /[A-Za-z0-9_\-:/.%!]/.test(ch);
 
@@ -32,13 +34,11 @@ export class Lexer {
   }
 
   private skipLineComment() {
-    // //
     while (this.i < this.input.length && this.peek() !== "\n") this.next();
   }
 
   private skipBlockComment() {
-    // /* ... */
-    this.next(); this.next(); // já consumiu "/*"
+    this.next(); this.next(); // /* já consumido
     while (this.i < this.input.length) {
       if (this.peek() === "*" && this.peek(1) === "/") { this.next(); this.next(); break; }
       this.next();
@@ -48,13 +48,13 @@ export class Lexer {
   private string(): Token {
     const quote = this.peek();
     const start = this.pos();
-    let raw = this.next(); // abre aspas
+    let raw = this.next();
     let val = "";
 
     while (this.i < this.input.length) {
       const ch = this.next();
       raw += ch;
-      if (ch === "\\") { // escape
+      if (ch === "\\") {
         const esc = this.next();
         raw += esc;
         val += ch + esc;
@@ -78,7 +78,6 @@ export class Lexer {
       while (isDigit(this.peek())) { const ch = this.next(); raw += ch; num += ch; }
     }
 
-    // dimensão (px, rem, %, etc.)
     let unit = "";
     if (this.peek() && /[A-Za-z%]/.test(this.peek())) {
       while (this.peek() && /[A-Za-z%]/.test(this.peek())) { const ch = this.next(); raw += ch; unit += ch; }
@@ -93,38 +92,32 @@ export class Lexer {
     let raw = "";
     let val = "";
 
-    if (this.peek() === ".") { raw += this.next(); val += "."; } // não usamos por enquanto, mas mantemos
+    if (this.peek() === ".") { raw += this.next(); val += "."; }
 
-    if (!isIdentStart(this.peek()) && this.peek() !== "-") {
-      // fallback IDENT (ex: --custom-prop inicia com -)
-    }
     while (this.peek() && isIdentChar(this.peek())) {
       const ch = this.next();
       raw += ch; val += ch;
     }
     if (this.peek() === "(") {
-      raw += this.next(); // (
-      return this.make("FUNCTION", start, this.pos(), val, val + "(",);
+      raw += this.next();
+      return this.make("FUNCTION", start, this.pos(), val, val + "(");
     }
     return this.make("IDENT", start, this.pos(), val, raw);
   }
 
   private selectorChunk(): Token {
-    // junta pedaços seguros até espaço, {, ou quebra de linha — útil para "hover:bg-red", "md:text-lg", "w-[23px]"
     const start = this.pos();
     let raw = "";
     while (this.i < this.input.length) {
       const ch = this.peek();
-      if (ch === "[" ) {
-        // capturar conteúdo entre colchetes, permitindo () dentro
-        raw += this.next(); // [
+      if (ch === "[") {
+        raw += this.next();
         let depth = 1;
         while (this.i < this.input.length && depth > 0) {
           const c = this.next(); raw += c;
           if (c === "[") depth++;
           else if (c === "]") depth--;
           else if (c === "'" || c === '"') {
-            // strings dentro dos colchetes
             const quote = c;
             while (this.i < this.input.length) {
               const s = this.next(); raw += s;
@@ -150,7 +143,7 @@ export class Lexer {
         }
         continue;
       }
-      if (!ch || isWhitespace(ch) || ch === "{" || ch === "}" || ch === ";" ) break;
+      if (!ch || isWhitespace(ch) || ch === "{" || ch === "}" || ch === ";") break;
       if (!isSelectorSafe(ch) && ch !== "[" && ch !== "]") break;
       raw += this.next();
     }
@@ -161,11 +154,9 @@ export class Lexer {
     while (this.i < this.input.length) {
       const ch = this.peek();
 
-      // comentários
       if (ch === "/" && this.peek(1) === "/") { this.skipLineComment(); continue; }
       if (ch === "/" && this.peek(1) === "*") { this.skipBlockComment(); continue; }
 
-      // espaços (em geral ignoramos, mas é útil no parser em contextos)
       if (isWhitespace(ch)) {
         const start = this.pos(); let raw = "";
         while (this.i < this.input.length && isWhitespace(this.peek())) raw += this.next();
@@ -189,16 +180,11 @@ export class Lexer {
       if (ch === "'" || ch === '"') { yield this.string(); continue; }
       if (isDigit(ch) || ((ch === "+" || ch === "-") && isDigit(this.peek(1)))) { yield this.numberOrDimension(); continue; }
 
-      // em contexto de seletor antes de {, usamos SELECTOR_CHUNK para aceitar coisas tipo md:hover:w-[10px]
-      // em outros contextos o parser cairá para IDENT/FUNCTION.
-      // aqui preferimos SELECTOR_CHUNK (é flexível) – o parser decide quando usá-lo.
-      if (isIdentStart(ch) || ch === "-" ) {
-        // olhamos adiante: se até o próximo { não houver whitespace "crítico", tratamos como SELECTOR_CHUNK
+      if (isIdentStart(ch) || ch === "-") {
         yield this.selectorChunk();
         continue;
       }
 
-      // fallback: IDENT de 1 char
       const raw = this.next();
       yield this.make("IDENT", start, this.pos(), raw, raw);
     }
@@ -211,8 +197,8 @@ export function lex(input: string): Token[] {
   const lx = new Lexer(input);
   const tokens: Token[] = [];
   for (const t of lx.tokenize()) {
-    if (t.type !== "WHITESPACE") tokens.push(t); // descartamos espaços por padrão
+    if (t.type !== "WHITESPACE") tokens.push(t);
   }
-  tokens.push({ type: "EOF", start: {offset: input.length, line: lx["line"], column: lx["col"]}, end: {offset: input.length, line: lx["line"], column: lx["col"]} });
+  tokens.push({ type: "EOF", start: { offset: input.length, line: lx["line"], column: lx["col"] }, end: { offset: input.length, line: lx["line"], column: lx["col"] } });
   return tokens;
 }
