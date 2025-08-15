@@ -1,17 +1,17 @@
+// src/jit/emit.ts
 import fs from "fs";
 import path from "path";
 
-/**
- * Grava o CSS final no disco.
- */
-export function emitCss(rules: string[], outputPath: string) {
-  const css = rules.join("\n");
-  const dir = path.dirname(outputPath);
+export function emitCss(rules: string[], outputPath: string, minify = false) {
+  let css = rules.join(minify ? "" : "\n");
+  if (minify) {
+    // remove quebras de linha e múltiplos espaços
+    css = css.replace(/\s+/g, " ");
+  }
 
-  // cria diretório se ainda não existir
+  const dir = path.dirname(outputPath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-
   fs.writeFileSync(outputPath, css, "utf8");
 }
