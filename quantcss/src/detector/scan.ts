@@ -36,6 +36,7 @@ export async function scanProject(rootDir: string, noCache = false) {
 
   await Promise.all(
     files.map(async (file: string) => {
+        
       if (!/\.(html?|jsx?|tsx?|vue|svelte|pug)$/.test(file)) return;
 
       const cached = getCached(file, cache, noCache);

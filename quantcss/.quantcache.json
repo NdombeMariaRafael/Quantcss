@@ -1,0 +1,98 @@
+{
+  "src/ast.ts": {
+    "classes": [],
+    "mtime": 1755203468222.3792
+  },
+  "src/catalog/known-props.ts": {
+    "classes": [],
+    "mtime": 1755205265082.4697
+  },
+  "src/catalog/known-props2.ts": {
+    "classes": [],
+    "mtime": 1755206151832.5144
+  },
+  "src/cli/build.ts": {
+    "classes": [],
+    "mtime": 1755259612248.9702
+  },
+  "src/cli/check.ts": {
+    "classes": [],
+    "mtime": 1755257555529.1165
+  },
+  "src/cli/dev.ts": {
+    "classes": [],
+    "mtime": 1755258297571.0637
+  },
+  "src/cli/index.ts": {
+    "classes": [],
+    "mtime": 1755257014359.1548
+  },
+  "src/css-props.ts": {
+    "classes": [],
+    "mtime": 1755205988251.506
+  },
+  "src/detector/cache.ts": {
+    "classes": [],
+    "mtime": 1755256006541.2263
+  },
+  "src/detector/extract.ts": {
+    "classes": [],
+    "mtime": 1755262446300.7688
+  },
+  "src/detector/scan.ts": {
+    "classes": [],
+    "mtime": 1755262353453.7754
+  },
+  "src/diagnostics.ts": {
+    "classes": [],
+    "mtime": 1755203436043.3777
+  },
+  "src/index.html": {
+    "classes": [
+      "bg-red",
+      "p-4",
+      "text-lg"
+    ],
+    "mtime": 1755261722533.8203
+  },
+  "src/index.ts": {
+    "classes": [],
+    "mtime": 1755261430767.841
+  },
+  "src/jit/cache.ts": {
+    "classes": [],
+    "mtime": 1755259456479.9812
+  },
+  "src/jit/compiler.ts": {
+    "classes": [],
+    "mtime": 1755256731590.1748
+  },
+  "src/jit/emit.ts": {
+    "classes": [],
+    "mtime": 1755259697452.964
+  },
+  "src/jit/hash.ts": {
+    "classes": [],
+    "mtime": 1755259439109.9824
+  },
+  "src/jit/utils.ts": {
+    "classes": [],
+    "mtime": 1755256692252.1777
+  },
+  "src/lexer.ts": {
+    "classes": [],
+    "mtime": 1755205958069.5046
+  },
+  "src/parser.ts": {
+    "classes": [],
+    "mtime": 1755203020725.3567
+  },
+  "src/types.ts": {
+    "classes": [],
+    "mtime": 1755202438927.3274
+  },
+  "src/validator.ts": {
+    "classes": [],
+    "mtime": 1755205495396.4814
+  }
+}

@@ -1,7 +1,7 @@
 {
   "type": "commonjs",
   "bin": {
-    "quant": "./dist/cli/index.js"
+    "quant": "./src/cli/index.ts"
   },
   "scripts": {
     "dev": "ts-node src/index.ts",

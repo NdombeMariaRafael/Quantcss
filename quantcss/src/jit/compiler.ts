@@ -1,18 +1,29 @@
 import { FlatRule } from "../ast";
-import { normalizeSelector, matchSelector } from "./utils";
+import { matchSelector, MatchMode, normalizeSelector } from "./utils";
 
 /**
  * Recebe regras planas (AST -> collectFlatRules) e a lista de classes usadas
  * Retorna um array de strings CSS prontos para serem emitidos
+ *
+ * @param flatRules    Regras planas do AST
+ * @param usedClasses  Lista de classes detectadas no projeto
+ * @param mode         "flex"   → ignora prefixos (default)
+ *                      "strict"→ match exato (mesmo prefixo/variante)
  */
-export function compileJIT(flatRules: FlatRule[], usedClasses: string[]): string[] {
-  const used = new Set(usedClasses.map(normalizeSelector));
+export function compileJIT(
+  flatRules: FlatRule[],
+  usedClasses: string[],
+  mode: MatchMode = "flex"
+): string[] {
+  // no strict mode guardamos o Set como está; no flex, as normalizações são feitas no match
+  const used = new Set(usedClasses);
+
   const output: string[] = [];
 
   for (const rule of flatRules) {
-    const sel = normalizeSelector(rule.selector);
+    const selector = rule.selector.trim();
 
-    if (!matchSelector(sel, used)) {
+    if (!matchSelector(selector, used, mode)) {
       // ignorar regra não usada
       continue;
     }
@@ -26,7 +37,8 @@ export function compileJIT(flatRules: FlatRule[], usedClasses: string[]): string
     }
 
     // regra principal
-    css += `.${sel}{`;
+    const base = normalizeSelector(selector);
+    css += `.${base}{`;
     for (const d of rule.declarations) {
       css += `${d.property}:${d.value};`;
     }
